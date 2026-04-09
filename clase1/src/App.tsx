@@ -1,38 +1,48 @@
-import { useState } from 'react'
-//import './App.css'
+import { Routes, Route, useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { CatImage } from './types/Cat';
+import { getCatImages } from './services/Api';
+
+import Header from './components/Header';
+import Footer from './components/Footer';
+import ListaItems from './components/ListaItems';
+import AcercaDe from './components/AcercaDe';
+import ItemDetalle from './components/ItemDetalle';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [data, setData] = useState<CatImage[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const images = await getCatImages(24);
+        setData(images);
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
-    <>
-     <p>Componente principal que manejará la lógica de la aplicación 
-      y la gestión del estado global (o al menos el estado de los datos
-       principales).</p>
-    </>
-  )
+    <div className="d-flex flex-column min-vh-100">
+      <Header onSearch={setSearchTerm} />
+      <main className="flex-grow-1">
+        <Routes>
+          <Route path="/" element={<ListaItems data={data} loading={loading} searchTerm={searchTerm} />} />
+          <Route path="/lista" element={<ListaItems data={data} loading={loading} searchTerm={searchTerm} />} />
+          <Route path="/lista/:id" element={<ItemDetalle data={data} />} />
+          <Route path="/acerca" element={<AcercaDe />} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  );
 }
 
-/*
-Se utilizará una API pública a elección, específicamente el endpoint para obtener una lista de elementos.
-En el componente correspondiente, utilizar el Hook useEffect para realizar la llamada a la API solo al montar el componente.
-Opcional y para investigar ⇒ Manejar el estado de la carga de datos (por ejemplo, mostrar un mensaje de "Cargando..." mientras se obtienen los datos).
-*/
-
-/*
-Utilizar el Hook useState para manejar al menos los siguientes estados dentro de la aplicación:
-
-data: Almacenar la lista de Pokémon obtenida de la API. Inicialmente un array vacío.
-(opcional) loading: Un booleano para indicar si la solicitud a la API está en curso. (En caso de utilizarse la opción de manejo de carga de datos)
-Opción para PROs!!!
-
-Agregar un searchTerm (en App.jsx o Buscador.jsx): La cadena de texto ingresada por el usuario en el componente Buscador. (opcional, si se implementa la funcionalidad de búsqueda/filtro)
-5. Funcionalidad de Búsqueda/Filtro (Opcional)
-Implementar una función que filtre los elementos mostrados en ListaItems.jsx basándose en el valor del estado searchTerm.
-El componente Buscador.jsx debe actualizar el estado searchTerm en su componente padre (App.jsx) utilizando una función pasada como prop.
-El filtro debe ser sensible a mayúsculas/minúsculas (opcionalmente, convertir ambos a minúsculas antes de la comparación).
-6. Presentación
-Dar un estilo básico a la aplicación para que sea visualmente presentable utilizando CSS plano, pueden utilizar Tailwind si ya lo conocen.
-*/
-
-export default App
+export default App;

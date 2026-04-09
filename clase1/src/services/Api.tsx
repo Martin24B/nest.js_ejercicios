@@ -8,7 +8,7 @@ export const getCatImages = async (limit: number): Promise<CatImage[]> => {
   
   const response = await fetch(url);
 
-  if (!response.ok) throw new Error('No se pudo obtener la respuesta de la consulta realizada...');
+  if (!response.ok) throw new Error('No se pudo obtener respuesta a la consulta realizada...');
   
   return response.json();
 };
